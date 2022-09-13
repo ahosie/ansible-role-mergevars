@@ -1,0 +1,8 @@
+---
+- name: Aggregate lists/sets
+  loop: "{{ mergevars_lists | default([]) }}"
+  include_tasks: merge_lists.yml
+
+- name: Aggregate dictionaries
+  loop: "{{ mergevars_dicts | default([]) }}"
+  include_tasks: merge_dicts.yml

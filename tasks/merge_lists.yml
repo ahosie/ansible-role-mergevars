@@ -1,0 +1,23 @@
+---
+- register: merger_tmpl
+  local_action:
+    module: tempfile
+    state: file
+
+- local_action:
+    module: copy
+    dest: "{{ merger_tmpl.path }}"
+    mode: 0644
+    content: |-
+      {% raw %}{{ ({% endraw %}
+      {{ lookup('varnames', item.pattern, wantlist=true) | join(' + ') }}
+      {% raw %}) | to_yaml }}{%  endraw %}
+
+- name: "Assign {{ item.variable }}"
+  set_fact:
+    "{{ item.variable }}": "{{ lookup('vars', item.variable, default=[]) + ( lookup('template', merger_tmpl.path) | from_yaml ) }}"
+
+- local_action:
+    module: file
+    state: absent
+    path: "{{ merger_tmpl.path }}"
