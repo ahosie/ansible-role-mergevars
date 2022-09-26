@@ -36,7 +36,9 @@ mergevars_dicts:
     pattern: 'bar_.+'
 ```
 
-Any variables that start with the name `bar_` (when this role is invoked) will be merged together in a single list named `foo`.
+Any variables that start with the name `bar_` (when this role is invoked) will be merged together in a single dictionary named `foo`.
+
+Warning: Duplicate keys will be overwritten, the order of which is not currently well-defined. 
 
 e.g. in a vars file (`vars/demo.yml`) you could define:
 ```yaml
