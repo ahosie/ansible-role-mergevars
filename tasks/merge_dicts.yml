@@ -4,15 +4,23 @@
     module: tempfile
     state: file
 
-- local_action:
+- when: query('varnames', item.pattern)|length > 1
+  local_action:
     module: copy
     dest: "{{ merger_tmpl.path }}"
     mode: 0644
-    content: "{% raw %}{{ ({% endraw %}{{ query('varnames', item.pattern) | join('|combine(') }}{% raw %} )| to_yaml }}{% endraw %}"
+    content: "{% raw %}{{ {% endraw %}{{ query('varnames', item.pattern) | join('|combine(') }}{% raw %} )| to_yaml }}{% endraw %}"
+
+- when: query('varnames', item.pattern)|length <= 1
+  local_action:
+    module: copy
+    dest: "{{ merger_tmpl.path }}"
+    mode: 0644
+    content: "{% raw %}{{ {% endraw %}{{ query('varnames', item.pattern) | join('|combine(') }}{% raw %} | to_yaml }}{% endraw %}"
 
 - name: "Assign {{ item.variable }}"
   set_fact:
-    "{{ item.variable }}": "{{ lookup('vars', item.variable, default={}) | combine( ( lookup('template', merger_tmpl.path) ) | from_yaml ) }}"
+    "{{ item.variable }}": "{{ lookup('vars', item.variable, default=dict()) | combine( ( lookup('template', merger_tmpl.path) ) | from_yaml ) }}"
 
 - local_action:
     module: file
